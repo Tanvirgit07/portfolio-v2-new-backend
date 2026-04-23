@@ -21,12 +21,10 @@ const heroSchema = new mongoose.Schema(
     titleLine2: {
       type: String
     },
-
     description: {
       type: String,
       required: true
     },
-
     primaryBtnText: {
       type: String,
       default: 'Download CV'
@@ -40,6 +38,12 @@ const heroSchema = new mongoose.Schema(
     },
     videoUrl: {
       type: String
+    },
+
+    // ✅ NEW FIELD
+    isActive: {
+      type: Boolean,
+      default: false
     }
   },
   {
@@ -47,5 +51,5 @@ const heroSchema = new mongoose.Schema(
   }
 );
 
-const Hero = mongoose.models.Hero || mongoose.model('Home', UserSchema);
+const Hero = mongoose.models.Hero || mongoose.model('Hero', heroSchema);
 export default Hero;
