@@ -1,5 +1,5 @@
 import { generateResponse } from '../../lib/responseFormate.js';
-import { createHomeContent, deleteHeroService, getAllHeroService, getsingleheroService, updateHomeContent } from './home.service.js';
+import { createHomeContent, deleteHeroService, getAllHeroService, getsingleheroService, toggleHeroStatusService, updateHomeContent } from './home.service.js';
 
 export const createHome = async (req, res, next) => {
   try {
@@ -113,6 +113,32 @@ export const deleteHero = async (req, res, next) => {
       return generateResponse(res, 404, false, error.message, null);
     }
 
+    next(error);
+  }
+};
+
+export const toggleHeroStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { isActive } = req.body; // ফ্রন্টএন্ড থেকে আসা isActive ভ্যালু
+
+    // সার্ভিস ফাংশনে আইডি এবং স্ট্যাটাস পাস করা
+    const data = await toggleHeroStatusService(id, isActive);
+
+    const statusMessage = data.isActive ? 'activated' : 'deactivated';
+
+    return generateResponse(
+      res,
+      200,
+      true,
+      `Hero content ${statusMessage} successfully`,
+      data
+    );
+  } catch (error) {
+    if (error.message === 'Hero content not found!') {
+      return generateResponse(res, 404, false, error.message, null);
+    }
+    
     next(error);
   }
 };

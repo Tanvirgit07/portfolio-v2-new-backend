@@ -196,3 +196,20 @@ export const deleteHeroService = async ({id}) => {
 
   return hero;
 };
+
+export const toggleHeroStatusService = async (id, isActive) => {
+  // ১. চেক করা এই আইডি-তে ডেটা আছে কি না
+  const hero = await Hero.findById(id);
+  if (!hero) {
+    throw new Error('Hero content not found!'); // এরর মেসেজ Hero অনুযায়ী ফিক্স করা হয়েছে
+  }
+
+  // ২. বডি থেকে আসা isActive ভ্যালু দিয়ে আপডেট করা
+  const updatedHero = await Hero.findByIdAndUpdate(
+    id,
+    { isActive: isActive },
+    { new: true, runValidators: true }
+  );
+
+  return updatedHero;
+};
