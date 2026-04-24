@@ -7,44 +7,71 @@ const projectSchema = new mongoose.Schema(
       required: [true, "Project title is required"],
       trim: true,
     },
+
     category: {
       type: String,
       required: [true, "Project category is required"],
-      trim: true, // এখন এটি যেকোনো স্ট্রিং গ্রহণ করবে
+      trim: true,
     },
-    thumbnail: {
+
+    // ✅ Multiple Images
+    images: [
+      {
+        url: {
+          type: String,
+          required: true,
+        },
+        publicId: {
+          type: String,
+        },
+      },
+    ],
+
+    // ✅ Single Video
+    video: {
       url: {
         type: String,
-        required: [true, "Project thumbnail is required"],
       },
       publicId: {
-        type: String, // ক্লাউডিনারি ফাইল আইডি (ভবিষ্যতে ডিলিট করার জন্য)
+        type: String,
       },
     },
+
+    // ✅ Dynamic Links
+    links: [
+      {
+        title: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        url: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+      },
+    ],
+
     tags: [
       {
         type: String,
         trim: true,
-      }
+      },
     ],
+
     description: [
       {
-        type: String, // প্যারাগ্রাফ স্টোর করার জন্য স্ট্রিং অ্যারে
+        type: String,
         trim: true,
-      }
+      },
     ],
+
     logicSnippet: {
       type: String,
       trim: true,
     },
-    liveLink: {
-      type: String,
-      trim: true,
-    },
-    sourceCode: {
-      type: String,
-      trim: true,
-    },
+
     isActive: {
       type: Boolean,
       default: true,

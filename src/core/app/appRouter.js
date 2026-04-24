@@ -5,6 +5,8 @@ import homeRoutes from '../../entities/home/home.routes.js';
 import aboutRoutes from '../../entities/about/about.routes.js';
 import skillsRoutes from '../../entities/skills/skills.routes.js';
 import resumeRoutes from '../../entities/resume/resume.routes.js';
+import projectRoutes from '../../entities/projects/project.routes.js';
+
 
 const router = express.Router();
 
@@ -14,5 +16,7 @@ router.use('/v1/home', homeRoutes);
 router.use('/v1/about', aboutRoutes);
 router.use('/v1/skill', skillsRoutes);
 router.use('/v1/resume', resumeRoutes);
+router.use('/v1/project', projectRoutes);
+
 
 export default router;
