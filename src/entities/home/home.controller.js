@@ -1,5 +1,5 @@
 import { generateResponse } from '../../lib/responseFormate.js';
-import { createHomeContent, deleteHeroService, getAllHeroService, getsingleheroService, toggleHeroStatusService, updateHomeContent } from './home.service.js';
+import { createHomeContent, deleteHeroService, getActiveHeroService, getAllHeroService, getsingleheroService, toggleHeroStatusService, updateHomeContent } from './home.service.js';
 
 export const createHome = async (req, res, next) => {
   try {
@@ -139,6 +139,23 @@ export const toggleHeroStatus = async (req, res, next) => {
       return generateResponse(res, 404, false, error.message, null);
     }
     
+    next(error);
+  }
+};
+
+export const getActiveHero = async (req, res, next) => {
+  try {
+    const data = await getActiveHeroService();
+
+    return generateResponse(
+      res,
+      200,
+      true,
+      'Active hero section fetched successfully',
+      data
+    );
+  } catch (error) {
+    // যদি ডাটা না পাওয়া যায় বা অন্য সমস্যা হয়
     next(error);
   }
 };

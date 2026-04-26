@@ -1,5 +1,5 @@
 import { generateResponse } from "../../lib/responseFormate.js";
-import { createAboutContent, deleteAboutService, getAllAboutService, getSingleAboutService, toggleAboutStatusService, updateAboutContent } from "./about.service.js";
+import { createAboutContent, deleteAboutService, getActiveAboutService, getAllAboutService, getSingleAboutService, toggleAboutStatusService, updateAboutContent } from "./about.service.js";
 
 export const createAbout = async (req, res, next) => {
   try {
@@ -160,6 +160,23 @@ export const toggleAboutStatus = async (req, res, next) => {
       return generateResponse(res, 404, false, error.message, null);
     }
     
+    next(error);
+  }
+};
+
+export const getActiveAbout = async (req, res, next) => {
+  try {
+    const data = await getActiveAboutService();
+
+    return generateResponse(
+      res,
+      200,
+      true,
+      'Active about section fetched successfully',
+      data
+    );
+  } catch (error) {
+    // যদি সার্ভিস থেকে Error থ্রো হয় (যেমন: ডাটা না পাওয়া গেলে)
     next(error);
   }
 };

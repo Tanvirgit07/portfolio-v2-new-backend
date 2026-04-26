@@ -213,3 +213,14 @@ export const toggleHeroStatusService = async (id, isActive) => {
 
   return updatedHero;
 };
+
+export const getActiveHeroService = async () => {
+  // শুধুমাত্র isActive: true ফিল্টার ব্যবহার করা হয়েছে
+  const activeHero = await Hero.findOne({ isActive: true });
+
+  if (!activeHero) {
+    throw new Error('No active hero section found');
+  }
+
+  return activeHero;
+};

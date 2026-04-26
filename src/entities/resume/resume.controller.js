@@ -1,5 +1,5 @@
 import { generateResponse } from "../../lib/responseFormate.js";
-import { createResumeService, deleteResumeService, getAllResumeService, updateResumeStatusService } from "./resume.service.js";
+import { createResumeService, deleteResumeService, getActiveResumeService, getAllResumeService, updateResumeStatusService } from "./resume.service.js";
 
 export const addResume = async (req, res, next) => {
   try {
@@ -94,6 +94,23 @@ export const deleteResume = async (req, res, next) => {
       return generateResponse(res, 404, false, error.message, null);
     }
 
+    next(error);
+  }
+};
+
+export const getActiveResume = async (req, res, next) => {
+  try {
+    const data = await getActiveResumeService();
+
+    return generateResponse(
+      res,
+      200,
+      true,
+      'Active resume fetched successfully',
+      data
+    );
+  } catch (error) {
+    // গ্লোবাল এরর হ্যান্ডলারে পাঠিয়ে দেওয়া
     next(error);
   }
 };

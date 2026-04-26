@@ -1,5 +1,5 @@
 import express from 'express';
-import { createHome, deleteHero, getAllHero, getsingleHero, toggleHeroStatus, updateHome } from './home.controller.js';
+import { createHome, deleteHero, getActiveHero, getAllHero, getsingleHero, toggleHeroStatus, updateHome } from './home.controller.js';
 import { multerUpload } from '../../core/middlewares/multer.js';
 
 const router = express.Router();
@@ -15,6 +15,7 @@ router.get('/getallHomeContent', getAllHero);
 router.get('/getSingleHomeContent/:id', getsingleHero);
 router.delete('/deleteHomeContent/:id', deleteHero);
 router.put('/toggleheroupdate/:id', toggleHeroStatus)
+router.get('/activeHero', getActiveHero);
 
 
 export default router;

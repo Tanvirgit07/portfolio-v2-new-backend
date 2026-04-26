@@ -1,6 +1,6 @@
 import express from 'express';
 import { multerUpload } from '../../core/middlewares/multer.js';
-import { createAbout, deleteAbout, getAllAbouts, getSingleAbout, toggleAboutStatus, updateAbout } from './about.controller.js';
+import { createAbout, deleteAbout, getActiveAbout, getAllAbouts, getSingleAbout, toggleAboutStatus, updateAbout } from './about.controller.js';
 
 const router = express.Router();
 
@@ -13,6 +13,8 @@ router.get('/getallaboutContent', getAllAbouts);
 router.get('/getsingleAbout/:id', getSingleAbout);
 router.delete('/deleteAbout/:id', deleteAbout);
 router.put('/updateIsActiveAbout/:id', toggleAboutStatus);
+router.get('/getActiveAbout', getActiveAbout);
+
 
 
 

@@ -91,3 +91,15 @@ export const deleteResumeService = async ({ id }) => {
 
   return resume;
 };
+
+export const getActiveResumeService = async () => {
+  // শুধুমাত্র active ডকুমেন্টটি খোঁজা হচ্ছে এবং লেটেস্টটি নেওয়া হচ্ছে
+  const activeResume = await Resume.findOne({ isActive: true })
+    .sort({ createdAt: -1 });
+
+  if (!activeResume) {
+    throw new Error('No active resume found');
+  }
+
+  return activeResume;
+};

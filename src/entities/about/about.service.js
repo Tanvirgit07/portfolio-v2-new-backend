@@ -187,3 +187,15 @@ export const toggleAboutStatusService = async (id, isActive) => {
 
   return updatedAbout;
 };
+
+export const getActiveAboutService = async () => {
+  // শুধুমাত্র active ডকুমেন্টটি খোঁজা হচ্ছে এবং লেটেস্টটি নেওয়া হচ্ছে
+  const activeAbout = await aboutModel.findOne({ isActive: true })
+    .sort({ createdAt: -1 });
+
+  if (!activeAbout) {
+    throw new Error('No active about section found');
+  }
+
+  return activeAbout;
+};
