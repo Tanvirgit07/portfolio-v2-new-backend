@@ -8,8 +8,8 @@ import resumeRoutes from '../../entities/resume/resume.routes.js';
 import projectRoutes from '../../entities/projects/project.routes.js';
 import experienceRoutes from '../../entities/experience/experience.routes.js';
 import feedbackRoutes from '../../entities/feedback/feedback.routes.js';
-
-
+import knowledgeRoutes from '../../entities/knoledge/knoledge.routes.js';
+import contactRoutes from '../../entities/contacts/contacts.routes.js';
 
 const router = express.Router();
 
@@ -22,8 +22,8 @@ router.use('/v1/resume', resumeRoutes);
 router.use('/v1/project', projectRoutes);
 router.use('/v1/experience', experienceRoutes);
 router.use('/v1/feedback', feedbackRoutes);
-
-
+router.use('/v1/knowledge', knowledgeRoutes);
+router.use('/v1/contact', contactRoutes);
 
 
 export default router;
