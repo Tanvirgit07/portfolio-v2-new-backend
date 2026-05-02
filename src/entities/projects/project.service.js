@@ -14,82 +14,62 @@ export const createProjectContent = async ({ body, files }) => {
     isActive,
   } = body;
 
-  // ✅ Images (multiple required)
+  // ✅ Images upload
   const imageFiles = files?.images;
-
   if (!imageFiles || imageFiles.length === 0) {
     throw new Error("At least one image is required!");
   }
 
   const uploadedImages = [];
-
   for (const file of imageFiles) {
     const result = await cloudinaryUpload(
       file.path,
       `project-${Date.now()}`,
       "portfoliov2/projects"
     );
-
-    if (!result?.secure_url) {
-      throw new Error("image upload failed");
-    }
-
+    if (!result?.secure_url) throw new Error("image upload failed");
     uploadedImages.push({
       url: result.secure_url,
       publicId: result.public_id,
     });
   }
 
-  // ✅ Video (single optional)
+  // ✅ Video upload
   let videoData = null;
-
   const videoFile = files?.video?.[0];
-
   if (videoFile) {
     const videoResult = await cloudinaryUpload(
       videoFile.path,
       `video-${Date.now()}`,
       "portfoliov2/videos"
     );
-
-    if (!videoResult?.secure_url) {
-      throw new Error("video upload failed");
-    }
-
+    if (!videoResult?.secure_url) throw new Error("video upload failed");
     videoData = {
       url: videoResult.secure_url,
       publicId: videoResult.public_id,
     };
   }
 
-  // ✅ Parse JSON fields
+  // ✅ Parse JSON fields (Only for Tags and Links)
   let parsedTags = [];
-  let parsedDescription = [];
   let parsedLinks = [];
 
   try {
-    parsedTags =
-      typeof tags === "string" ? JSON.parse(tags) : tags || [];
-
-    parsedDescription =
-      typeof description === "string"
-        ? JSON.parse(description)
-        : description || [];
-
-    parsedLinks =
-      typeof links === "string" ? JSON.parse(links) : links || [];
+    parsedTags = typeof tags === "string" ? JSON.parse(tags) : tags || [];
+    parsedLinks = typeof links === "string" ? JSON.parse(links) : links || [];
+    // description কে JSON.parse করার দরকার নেই কারণ এটি HTML String
   } catch (err) {
-    throw new Error("Invalid JSON format in tags/description/links");
+    throw new Error("Invalid JSON format in tags or links");
   }
 
-  // ✅ Create Project
+  // ✅ Create Project in DB
   const newProject = await Project.create({
     title,
     category,
     images: uploadedImages,
     video: videoData,
     tags: parsedTags,
-    description: parsedDescription,
+    description: description, // সরাসরি HTML String হিসেবে যাবে
     logicSnippet,
     links: parsedLinks,
     isActive: isActive !== undefined ? isActive : true,
@@ -100,10 +80,7 @@ export const createProjectContent = async ({ body, files }) => {
 
 export const updateProjectContent = async ({ id, body, files }) => {
   const project = await Project.findById(id);
-
-  if (!project) {
-    throw new Error("Project not found");
-  }
+  if (!project) throw new Error("Project not found");
 
   const {
     title,
@@ -113,139 +90,75 @@ export const updateProjectContent = async ({ id, body, files }) => {
     logicSnippet,
     links,
     isActive,
-    existingImages, // frontend থেকে পাঠাবি (যেগুলো রাখতে চাস)
-    removeVideo,    // true হলে video delete হবে
+    existingImages,
+    removeVideo,
   } = body;
 
-  // =========================
   // ✅ Handle Images
-  // =========================
-
   let finalImages = [];
-
-  // 👉 keep existing images
   if (existingImages) {
     try {
-      const parsedExisting =
-        typeof existingImages === "string"
-          ? JSON.parse(existingImages)
-          : existingImages;
-
-      finalImages = parsedExisting;
+      finalImages = typeof existingImages === "string" ? JSON.parse(existingImages) : existingImages;
     } catch {
       throw new Error("Invalid existingImages format");
     }
   }
 
-  // 👉 delete removed images from cloudinary
+  // Delete removed images from Cloudinary
   const oldImages = project.images || [];
-
   const removedImages = oldImages.filter(
-    (oldImg) =>
-      !finalImages.some((img) => img.publicId === oldImg.publicId)
+    (oldImg) => !finalImages.some((img) => img.publicId === oldImg.publicId)
   );
-
   for (const img of removedImages) {
-    if (img.publicId) {
-      await cloudinaryDelete(img.publicId);
-    }
+    if (img.publicId) await cloudinaryDelete(img.publicId);
   }
 
-  // 👉 upload new images
+  // Upload new images
   const newImageFiles = files?.images || [];
-
   for (const file of newImageFiles) {
-    const result = await cloudinaryUpload(
-      file.path,
-      `project-${Date.now()}`,
-      "portfoliov2/projects"
-    );
-
-    if (!result?.secure_url) {
-      throw new Error("image upload failed");
-    }
-
-    finalImages.push({
-      url: result.secure_url,
-      publicId: result.public_id,
-    });
+    const result = await cloudinaryUpload(file.path, `project-${Date.now()}`, "portfoliov2/projects");
+    if (!result?.secure_url) throw new Error("image upload failed");
+    finalImages.push({ url: result.secure_url, publicId: result.public_id });
   }
 
-  // =========================
   // ✅ Handle Video
-  // =========================
-
   let finalVideo = project.video;
-
-  // 👉 remove video যদি true আসে
   if (removeVideo === "true" || removeVideo === true) {
-    if (project.video?.publicId) {
-      await cloudinaryDelete(project.video.publicId);
-    }
+    if (project.video?.publicId) await cloudinaryDelete(project.video.publicId);
     finalVideo = null;
   }
 
-  // 👉 নতুন video upload
   const videoFile = files?.video?.[0];
-
   if (videoFile) {
-    // old delete
-    if (project.video?.publicId) {
-      await cloudinaryDelete(project.video.publicId);
-    }
-
-    const videoResult = await cloudinaryUpload(
-      videoFile.path,
-      `video-${Date.now()}`,
-      "portfoliov2/videos"
-    );
-
-    if (!videoResult?.secure_url) {
-      throw new Error("video upload failed");
-    }
-
-    finalVideo = {
-      url: videoResult.secure_url,
-      publicId: videoResult.public_id,
-    };
+    if (project.video?.publicId) await cloudinaryDelete(project.video.publicId);
+    const videoResult = await cloudinaryUpload(videoFile.path, `video-${Date.now()}`, "portfoliov2/videos");
+    if (!videoResult?.secure_url) throw new Error("video upload failed");
+    finalVideo = { url: videoResult.secure_url, publicId: videoResult.public_id };
   }
 
+  // ✅ Parse Tags and Links (Only if they are updated)
   let parsedTags = project.tags;
-  let parsedDescription = project.description;
   let parsedLinks = project.links;
 
   try {
-    if (tags) {
-      parsedTags = typeof tags === "string" ? JSON.parse(tags) : tags;
-    }
-
-    if (description) {
-      parsedDescription =
-        typeof description === "string"
-          ? JSON.parse(description)
-          : description;
-    }
-
-    if (links) {
-      parsedLinks =
-        typeof links === "string" ? JSON.parse(links) : links;
-    }
+    if (tags) parsedTags = typeof tags === "string" ? JSON.parse(tags) : tags;
+    if (links) parsedLinks = typeof links === "string" ? JSON.parse(links) : links;
   } catch {
-    throw new Error("Invalid JSON format");
+    throw new Error("Invalid JSON format in tags or links");
   }
+
+  // ✅ Update Object
   project.title = title ?? project.title;
   project.category = category ?? project.category;
   project.images = finalImages;
   project.video = finalVideo;
   project.tags = parsedTags;
-  project.description = parsedDescription;
+  project.description = description ?? project.description; // HTML String সরাসরি আপডেট হবে
   project.logicSnippet = logicSnippet ?? project.logicSnippet;
   project.links = parsedLinks;
-  project.isActive =
-    isActive !== undefined ? isActive : project.isActive;
+  project.isActive = isActive !== undefined ? isActive : project.isActive;
 
   await project.save();
-
   return project;
 };
 
