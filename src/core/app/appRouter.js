@@ -11,6 +11,7 @@ import feedbackRoutes from '../../entities/feedback/feedback.routes.js';
 import knowledgeRoutes from '../../entities/knoledge/knoledge.routes.js';
 import contactRoutes from '../../entities/contacts/contacts.routes.js';
 import dashboardRoutes from '../../entities/dashboard/dash.routes.js';
+import certificateRoutes from '../../entities/certificates/certificate.routes.js';
 
 
 const router = express.Router();
@@ -27,6 +28,7 @@ router.use('/v1/feedback', feedbackRoutes);
 router.use('/v1/knowledge', knowledgeRoutes);
 router.use('/v1/contact', contactRoutes);
 router.use('/v1/dashboard', dashboardRoutes);
+router.use('/v1/certificate', certificateRoutes);
 
 
 

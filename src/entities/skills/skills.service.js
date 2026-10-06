@@ -83,7 +83,7 @@ export const updateSkillService = async ({ id, body, files }) => {
 
 export const getAllSkillService = async ({ 
   page = 1, 
-  limit = 10, 
+  limit, 
   searchTerm = "" 
 }) => {
   const filter = {};
@@ -93,21 +93,35 @@ export const getAllSkillService = async ({
     filter.name = { $regex: searchTerm, $options: 'i' }; // 'i' মানে case-insensitive
   }
 
-  const pageNumber = Number(page) || 1;
-  const limitNumber = Number(limit) || 10;
-
-  // মোট স্কিল সংখ্যা (ফিল্টার অনুযায়ী)
   const total = await Skill.countDocuments(filter);
+  const pageNumber = Number(page) || 1;
+  const parsedLimit = limit !== undefined && limit !== "" ? Number(limit) : undefined;
 
-  // ডাটা কুয়েরি
-  const skills = await Skill.find(filter)
-    .sort({ createdAt: -1 })
-    .skip((pageNumber - 1) * limitNumber)
-    .limit(limitNumber);
+  let query = Skill.find(filter).sort({ createdAt: -1 });
+
+  // যদি স্পেসিফিক পজিটিভ লিমিট দেওয়া থাকে, তবে পেজিনেশন করবে
+  // অন্যথায় (কোনো লিমিট না দিলে বা limit=0 দিলে), সব স্কিল রিটার্ন করবে
+  if (parsedLimit && parsedLimit > 0) {
+    query = query.skip((pageNumber - 1) * parsedLimit).limit(parsedLimit);
+    const skills = await query;
+    return {
+      skills,
+      paginationInfo: createPaginationInfo(pageNumber, parsedLimit, total)
+    };
+  }
+
+  // সব স্কিল একসাথে রিটার্ন করা (পেজিনেশন ছাড়া)
+  const skills = await query;
 
   return {
     skills,
-    paginationInfo: createPaginationInfo(pageNumber, limitNumber, total)
+    paginationInfo: {
+      currentPage: 1,
+      totalPages: 1,
+      totalData: total,
+      hasNextPage: false,
+      hasPrevPage: false
+    }
   };
 };
 
