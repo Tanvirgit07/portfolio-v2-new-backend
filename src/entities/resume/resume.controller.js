@@ -114,3 +114,54 @@ export const getActiveResume = async (req, res, next) => {
     next(error);
   }
 };
+
+export const viewResumeFile = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const ResumeModel = (await import("./resume.model.js")).default;
+    const cloudinary = (await import("../../lib/cloudinaryUpload.js")).default;
+
+    const resume = await ResumeModel.findById(id);
+    if (!resume) {
+      return res.status(404).send('Resume not found');
+    }
+
+    if (resume.publicId) {
+      const signedUrl = cloudinary.utils.private_download_url(resume.publicId, '', {
+        resource_type: 'raw',
+        type: 'upload',
+        expires_at: Math.floor(Date.now() / 1000) + 7200,
+      });
+      return res.redirect(signedUrl);
+    }
+
+    return res.redirect(resume.resumeUrl);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const viewActiveResumeFile = async (req, res, next) => {
+  try {
+    const ResumeModel = (await import("./resume.model.js")).default;
+    const cloudinary = (await import("../../lib/cloudinaryUpload.js")).default;
+
+    const resume = await ResumeModel.findOne({ isActive: true }).sort({ createdAt: -1 });
+    if (!resume) {
+      return res.status(404).send('No active resume found');
+    }
+
+    if (resume.publicId) {
+      const signedUrl = cloudinary.utils.private_download_url(resume.publicId, '', {
+        resource_type: 'raw',
+        type: 'upload',
+        expires_at: Math.floor(Date.now() / 1000) + 7200,
+      });
+      return res.redirect(signedUrl);
+    }
+
+    return res.redirect(resume.resumeUrl);
+  } catch (error) {
+    next(error);
+  }
+};

@@ -1,6 +1,19 @@
-import { cloudinaryUpload } from "../../lib/cloudinaryUpload.js";
+import cloudinary, { cloudinaryUpload } from "../../lib/cloudinaryUpload.js";
 import { createPaginationInfo } from "../../lib/pagination.js";
 import Resume from "./resume.model.js";
+
+function getSignedDownloadUrl(publicId, fallbackUrl) {
+  if (!publicId) return fallbackUrl;
+  try {
+    return cloudinary.utils.private_download_url(publicId, '', {
+      resource_type: 'raw',
+      type: 'upload',
+      expires_at: Math.floor(Date.now() / 1000) + 7200,
+    });
+  } catch {
+    return fallbackUrl;
+  }
+}
 
 export const createResumeService = async ({ body, files }) => {
   const { title, version } = body;
@@ -54,8 +67,14 @@ export const getAllResumeService = async ({ page = 1, limit = 10, isActive }) =>
     .skip((pageNumber - 1) * limitNumber)
     .limit(limitNumber);
 
+  const formattedResumes = resumes.map((r) => {
+    const obj = r.toObject();
+    obj.downloadUrl = getSignedDownloadUrl(obj.publicId, obj.resumeUrl);
+    return obj;
+  });
+
   return {
-    resumes,
+    resumes: formattedResumes,
     // আপনার সিস্টেমে থাকা pagination helper টি ব্যবহার করা হয়েছে
     paginationInfo: createPaginationInfo(pageNumber, limitNumber, total)
   };
@@ -101,5 +120,8 @@ export const getActiveResumeService = async () => {
     throw new Error('No active resume found');
   }
 
-  return activeResume;
+  const obj = activeResume.toObject();
+  obj.downloadUrl = getSignedDownloadUrl(obj.publicId, obj.resumeUrl);
+
+  return obj;
 };

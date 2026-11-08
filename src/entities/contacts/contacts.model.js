@@ -28,7 +28,7 @@ const contactSchema = new mongoose.Schema(
     services: [
       {
         type: String,
-        enum: ["Web Design", "Mobile App Design", "Collaboration", "Others"],
+        trim: true,
       },
     ],
     message: {

@@ -12,10 +12,14 @@ import {
      adminDeleteUserController
     } from "./user.controller.js";
 import { adminMiddleware,  verifyToken } from "../../core/middlewares/authMiddleware.js";
+import { loginUser } from "../auth/auth.controller.js";
 import express from "express";
 
 
 const router = express.Router();
+
+// Signin alias for dashboard
+router.post("/signin", loginUser);
 
 
 // Admin dashboard
