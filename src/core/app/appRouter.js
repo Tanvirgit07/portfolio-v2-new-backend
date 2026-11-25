@@ -16,6 +16,10 @@ import certificateRoutes from '../../entities/certificates/certificate.routes.js
 
 const router = express.Router();
 
+router.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', uptime: process.uptime(), timestamp: new Date().toISOString() });
+});
+
 router.use('/v1/auth', authRoutes);
 router.use('/v1/user', userRoutes);
 router.use('/v1/home', homeRoutes);

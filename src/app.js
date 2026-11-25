@@ -44,6 +44,16 @@ app.use(express.json({ limit: '10000kb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// Health check and root endpoints (Exempt from rate limiter, instant 200 OK for pingers like cron-job.org / UptimeRobot)
+app.get(['/', '/health'], (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    message: 'Portfolio API server is running',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Set up rate limiting middleware
 app.use(globalLimiter);
 
